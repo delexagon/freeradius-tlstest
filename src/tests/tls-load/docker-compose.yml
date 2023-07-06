@@ -1,0 +1,50 @@
+version: "3"
+
+name: test-container
+
+networks:
+  test-net: 
+
+services:
+  tasks:
+    image: ${IMAGE}
+    entrypoint: bash -c "mkdir /test/containers ; rm /test/containers/*"
+    volumes:
+      - ./test:/test
+  
+  proxy:
+    depends_on:
+      - home
+      - client
+    image: ${IMAGE}
+    entrypoint: /test/proxy-entrypoint.sh
+    environment:
+      - LOG_LEVEL
+    networks:
+      - test-net
+    volumes:
+      - ./test:/test
+
+  home:
+    depends_on:
+      - tasks
+    image: ${IMAGE}
+    entrypoint: /test/home-entrypoint.sh
+    environment:
+      - LOG_LEVEL
+    networks:
+      - test-net
+    volumes:
+      - ./test:/test
+
+  client:
+    depends_on:
+      - tasks
+    image: ${IMAGE}
+    entrypoint: /test/client-entrypoint.sh
+    environment:
+      - NUM_REQUESTS
+    networks:
+      - test-net
+    volumes:
+      - ./test:/test

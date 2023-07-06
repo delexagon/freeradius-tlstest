@@ -3,7 +3,7 @@
 ## Makefile -- Build and run tests for the server.
 ##
 ##	http://www.freeradius.org/
-##	$Id: f7ab1f9b400f3e3bee1d80ba97ae24b4c6bd7f2a $
+##	$Id$
 ##
 #
 include ../../Make.inc
@@ -115,7 +115,7 @@ SECRET	= testing123
 #
 #	Build the directory for testing the server
 #
-all: tests
+all: tests tests.load
 
 clean:
 	@rm -f test.conf dictionary *.ok *.log $(BUILD_DIR)/tests/eap
@@ -335,5 +335,9 @@ endif # we have eapol_test built
 tests.runtests:  test.conf | radiusd.kill radiusd.pid
 	${Q}chmod a+x runtests.sh
 	${Q}BIN_PATH="$(BIN_PATH)" PORT="$(PORT)" ./runtests.sh $(TESTS)
+
+# not run in the rest of the test suite, requires Docker
+tests.load:
+	${Q}(cd tls-load && ./run_test.sh -m 10)
 
 tests: tests.runtests tests.eap
